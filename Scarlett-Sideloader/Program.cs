@@ -36,21 +36,23 @@ namespace Scarlett_Sideloader
                 new Argument<string>("cookie", "Your asp.net.cookies"),
                 new Argument<FileInfo>("file", "The path to your appx, msix, appxbundle and msixbundle"),
                 new Option<string?>(aliases: new String[] {"--name", "-N", "-n"}, description: "Name to use for the app store page (if left blank it will be randomly generated)."),
+                new Option<string?>(aliases: new String[] {"--desc", "-D", "-d"}, description: "Text to use for store page description."),
                 new Option<bool>(aliases: new String[] {"--app", "-A", "-a"},  description: "Install as an app rather than a game (defaults to game)."),
                 new Option<string?>(aliases: new String[] {"--emails", "-E", "-e"}, description: "Emails to whitelist, seperated by commas."),
                 new Option<string?>(aliases: new String[] {"--groups", "-G", "-g"}, description: "Groups to whitelist, seperated by commas."),
                 new Option<bool>(aliases: new String[] {"--original", "-O", "-o"}, description: "Keep package file as original."),
             };
 
-            cmd.Handler = CommandHandler.Create<string, FileInfo, string?, bool, string?, string?, bool, IConsole>(HandleInput);
+            cmd.Handler = CommandHandler.Create<string, FileInfo, string?, string?, bool, string?, string?, bool, IConsole>(HandleInput);
 
             return await cmd.InvokeAsync(args);
         }
 
-        static public void HandleInput(string cookie, FileInfo file, string? name, bool app, string? emails, string? groups, bool original, IConsole console)
+        static public void HandleInput(string cookie, FileInfo file, string? name, string? desc, bool app, string? emails, string? groups, bool original, IConsole console)
         {
             string filename = file.Name;
             string filepath = file.FullName;
+
             if ((emails == null) && (groups == null))
             {
                 Console.ForegroundColor = ConsoleColor.Red;
@@ -583,139 +585,139 @@ namespace Scarlett_Sideloader
             string token = HttpUtility.ParseQueryString(new Uri(neededuploadinfo.UploadInfo.SasUrl).Query).Get("token");
             
 
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.Write($"Setting Metadata for {appname}: ");
+            //Console.ForegroundColor = ConsoleColor.White;
+            //Console.Write($"Setting Metadata for {appname}: ");
 
-            //read package as a filestream
-            FileStream packagestream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
+            ////read package as a filestream
+            //FileStream packagestream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
 
-            //set the metadata for the file this has to be done here as unfortunately there are too many variables to pass, it is bad practice I know but its just too much to put into a function
-            string longurl = $"https://upload.xboxlive.com/upload/setmetadata/{neededuploadinfo.UploadInfo.XfusId}";
-            var uriBuilder = new UriBuilder(longurl);
-            var query = HttpUtility.ParseQueryString(uriBuilder.Query);
-            query["filename"] = filename;
-            query["fileSize"] = packagestream.Length.ToString();
-            query["token"] = token;
-            uriBuilder.Query = query.ToString();
-            longurl = uriBuilder.ToString();
+            ////set the metadata for the file this has to be done here as unfortunately there are too many variables to pass, it is bad practice I know but its just too much to put into a function
+            //string longurl = $"https://upload.xboxlive.com/upload/setmetadata/{neededuploadinfo.UploadInfo.XfusId}";
+            //var uriBuilder = new UriBuilder(longurl);
+            //var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+            //query["filename"] = filename;
+            //query["fileSize"] = packagestream.Length.ToString();
+            //query["token"] = token;
+            //uriBuilder.Query = query.ToString();
+            //longurl = uriBuilder.ToString();
 
-            var request = new HttpRequestMessage(HttpMethod.Options, longurl);
-            var response = client.SendAsync(request);
-            response.Wait();
-            if (!response.Result.IsSuccessStatusCode)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Failed to set metadata for app, cookie is likely invalid");
-                return;
-            }
+            //var request = new HttpRequestMessage(HttpMethod.Options, longurl);
+            //var response = client.SendAsync(request);
+            //response.Wait();
+            //if (!response.Result.IsSuccessStatusCode)
+            //{
+            //    Console.ForegroundColor = ConsoleColor.Red;
+            //    Console.WriteLine("Failed to set metadata for app, cookie is likely invalid");
+            //    return;
+            //}
 
-            request = new HttpRequestMessage(HttpMethod.Post, longurl);
-            response = client.SendAsync(request);
-            response.Wait();
+            //request = new HttpRequestMessage(HttpMethod.Post, longurl);
+            //response = client.SendAsync(request);
+            //response.Wait();
 
-            NeededMetadata neededmetadata;
-            if (!response.Result.IsSuccessStatusCode)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Failed to set metadata for app, cookie is likely invalid");
-                return;
-            }
+            //NeededMetadata neededmetadata;
+            //if (!response.Result.IsSuccessStatusCode)
+            //{
+            //    Console.ForegroundColor = ConsoleColor.Red;
+            //    Console.WriteLine("Failed to set metadata for app, cookie is likely invalid");
+            //    return;
+            //}
 
-            string responseresult = response.Result.Content.ReadAsStringAsync().Result;
-            neededmetadata = JsonConvert.DeserializeObject<NeededMetadata>(responseresult);
+            //string responseresult = response.Result.Content.ReadAsStringAsync().Result;
+            //neededmetadata = JsonConvert.DeserializeObject<NeededMetadata>(responseresult);
 
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("Success!\n");
+            //Console.ForegroundColor = ConsoleColor.Green;
+            //Console.Write("Success!\n");
 
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.Write($"Calculating number of chunks needed for {appname}: ");
-            //chunksize in bytes
-            int chunksize = Convert.ToInt32(neededmetadata.ChunkSize);
-            //number of chunks
-            decimal chunksnum = packagestream.Length / chunksize;
-            int chunks = Convert.ToInt32(Math.Ceiling(chunksnum))+1;
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("Success!\n");
+            //Console.ForegroundColor = ConsoleColor.White;
+            //Console.Write($"Calculating number of chunks needed for {appname}: ");
+            ////chunksize in bytes
+            //int chunksize = Convert.ToInt32(neededmetadata.ChunkSize);
+            ////number of chunks
+            //decimal chunksnum = packagestream.Length / chunksize;
+            //int chunks = Convert.ToInt32(Math.Ceiling(chunksnum))+1;
+            //Console.ForegroundColor = ConsoleColor.Green;
+            //Console.Write("Success!\n");
 
-            for (int i = 0; i < chunks; i++)
-            {
-                int chunknum = i + 1;
-                if (!UploadChunk(token, chunknum, null, neededuploadinfo, HttpMethod.Options))
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Failed to setmetadata for chunk");
-                    return;
-                }
-            }
+            //for (int i = 0; i < chunks; i++)
+            //{
+            //    int chunknum = i + 1;
+            //    if (!UploadChunk(token, chunknum, null, neededuploadinfo, HttpMethod.Options))
+            //    {
+            //        Console.ForegroundColor = ConsoleColor.Red;
+            //        Console.WriteLine("Failed to setmetadata for chunk");
+            //        return;
+            //    }
+            //}
 
-                for (int i = 0; i < chunks; i++)
-            {
-                long position = (i * (long)chunksize);
-                int toRead = (int)Math.Min(packagestream.Length - position + 1, chunksize);
-                byte[] buffer = new byte[toRead];
-                packagestream.Read(buffer, 0, buffer.Length);
-                int chunknum = i + 1;   
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.Write($"Uploading chunk number {chunknum} of {chunks}: ");
-                if (UploadChunk(token, chunknum, buffer, neededuploadinfo, HttpMethod.Post))
-                {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.Write("Success!\n");
-                } else {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Failed to upload chunk");
-                    return;
-                }
-            }
+            //    for (int i = 0; i < chunks; i++)
+            //{
+            //    long position = (i * (long)chunksize);
+            //    int toRead = (int)Math.Min(packagestream.Length - position + 1, chunksize);
+            //    byte[] buffer = new byte[toRead];
+            //    packagestream.Read(buffer, 0, buffer.Length);
+            //    int chunknum = i + 1;   
+            //    Console.ForegroundColor = ConsoleColor.White;
+            //    Console.Write($"Uploading chunk number {chunknum} of {chunks}: ");
+            //    if (UploadChunk(token, chunknum, buffer, neededuploadinfo, HttpMethod.Post))
+            //    {
+            //        Console.ForegroundColor = ConsoleColor.Green;
+            //        Console.Write("Success!\n");
+            //    } else {
+            //        Console.ForegroundColor = ConsoleColor.Red;
+            //        Console.WriteLine("Failed to upload chunk");
+            //        return;
+            //    }
+            //}
 
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.Write($"Marking upload as finished: ");
+            //Console.ForegroundColor = ConsoleColor.White;
+            //Console.Write($"Marking upload as finished: ");
 
-            if (!UploadFinished(token, neededuploadinfo, HttpMethod.Options))
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Failed to mark upload as finished");
-                return;
-            }
+            //if (!UploadFinished(token, neededuploadinfo, HttpMethod.Options))
+            //{
+            //    Console.ForegroundColor = ConsoleColor.Red;
+            //    Console.WriteLine("Failed to mark upload as finished");
+            //    return;
+            //}
 
-            if (UploadFinished(token, neededuploadinfo, HttpMethod.Post))
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write("Success!\n");
-            } else {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Failed to mark upload as finished");
-                return;
-            }
+            //if (UploadFinished(token, neededuploadinfo, HttpMethod.Post))
+            //{
+            //    Console.ForegroundColor = ConsoleColor.Green;
+            //    Console.Write("Success!\n");
+            //} else {
+            //    Console.ForegroundColor = ConsoleColor.Red;
+            //    Console.WriteLine("Failed to mark upload as finished");
+            //    return;
+            //}
 
-            CommitalInfo commitalinfo = new CommitalInfo() { Id = neededuploadinfo.Id};
+            //CommitalInfo commitalinfo = new CommitalInfo() { Id = neededuploadinfo.Id};
 
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.Write($"Commiting upload: ");
-            if (CommitUpload(commitalinfo))
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write("Success!\n");
-            }
-            else
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Failed to commit upload");
-                return;
-            }
+            //Console.ForegroundColor = ConsoleColor.White;
+            //Console.Write($"Commiting upload: ");
+            //if (CommitUpload(commitalinfo))
+            //{
+            //    Console.ForegroundColor = ConsoleColor.Green;
+            //    Console.Write("Success!\n");
+            //}
+            //else
+            //{
+            //    Console.ForegroundColor = ConsoleColor.Red;
+            //    Console.WriteLine("Failed to commit upload");
+            //    return;
+            //}
 
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.Write($"Set target platforms: ");
+            //Console.ForegroundColor = ConsoleColor.White;
+            //Console.Write($"Set target platforms: ");
 
-            if (SetPlatforms(neededsubmissioninfo))
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write("Success!\n");
-            } else {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Failed to set target platforms");
-                return;
-            }
+            //if (SetPlatforms(neededsubmissioninfo))
+            //{
+            //    Console.ForegroundColor = ConsoleColor.Green;
+            //    Console.Write("Success!\n");
+            //} else {
+            //    Console.ForegroundColor = ConsoleColor.Red;
+            //    Console.WriteLine("Failed to set target platforms");
+            //    return;
+            //}
 
             //set languages
             Console.ForegroundColor = ConsoleColor.White;
@@ -761,7 +763,7 @@ namespace Scarlett_Sideloader
             Console.Write($"Setting languages for {appname}: ");
             
 
-            if (SetListing(createdappinfo, neededsubmissioninfo, listinginfo, appname))
+            if (SetListing(createdappinfo, neededsubmissioninfo, listinginfo, appname, desc))
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.Write("Success!\n");
@@ -2246,7 +2248,7 @@ namespace Scarlett_Sideloader
             }
         }
 
-        static bool SetListing(NeededAppInfo createdappinfo, NeededSubmissionInfo neededsubmissioninfo, ListingInfo listinginfo, string name)
+        static bool SetListing(NeededAppInfo createdappinfo, NeededSubmissionInfo neededsubmissioninfo, ListingInfo listinginfo, string name, string description)
         {
             MultipartFormDataContent form = new MultipartFormDataContent(("------WebKitFormBoundary" + RandomString(16)));
             HttpContent tempcontent;
@@ -2294,8 +2296,9 @@ namespace Scarlett_Sideloader
             tempcontent.Headers.Clear();
             tempcontent.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data") { Name = "ListingModels[0].Listing.Title" };
             form.Add(tempcontent);
-            tempcontent = new StringContent("a");
+            tempcontent = new StringContent(description);
             tempcontent.Headers.Clear();
+            //TODO
             tempcontent.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data") { Name = "ListingModels[0].Listing.Description" };
             form.Add(tempcontent);
             tempcontent = new StringContent("");
