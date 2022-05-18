@@ -2248,7 +2248,7 @@ namespace Scarlett_Sideloader
             }
         }
 
-        static bool SetListing(NeededAppInfo createdappinfo, NeededSubmissionInfo neededsubmissioninfo, ListingInfo listinginfo, string name, string description)
+        static bool SetListing(NeededAppInfo createdappinfo, NeededSubmissionInfo neededsubmissioninfo, ListingInfo listinginfo, string name, string desc)
         {
             MultipartFormDataContent form = new MultipartFormDataContent(("------WebKitFormBoundary" + RandomString(16)));
             HttpContent tempcontent;
@@ -2296,7 +2296,7 @@ namespace Scarlett_Sideloader
             tempcontent.Headers.Clear();
             tempcontent.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data") { Name = "ListingModels[0].Listing.Title" };
             form.Add(tempcontent);
-            tempcontent = new StringContent(description);
+            tempcontent = new StringContent(desc);
             tempcontent.Headers.Clear();
             //TODO
             tempcontent.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data") { Name = "ListingModels[0].Listing.Description" };
