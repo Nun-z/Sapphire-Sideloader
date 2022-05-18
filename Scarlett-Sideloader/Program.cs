@@ -37,18 +37,19 @@ namespace Scarlett_Sideloader
                 new Argument<FileInfo>("file", "The path to your appx, msix, appxbundle and msixbundle"),
                 new Option<string?>(aliases: new String[] {"--name", "-N", "-n"}, description: "Name to use for the app store page (if left blank it will be randomly generated)."),
                 new Option<string?>(aliases: new String[] {"--desc", "-D", "-d"}, description: "Text to use for store page description."),
+                new Option<string?>(aliases: new String[] {"--screen", "-S", "-s"}, description: "Filename of screenshot image"),
                 new Option<bool>(aliases: new String[] {"--app", "-A", "-a"},  description: "Install as an app rather than a game (defaults to game)."),
                 new Option<string?>(aliases: new String[] {"--emails", "-E", "-e"}, description: "Emails to whitelist, seperated by commas."),
                 new Option<string?>(aliases: new String[] {"--groups", "-G", "-g"}, description: "Groups to whitelist, seperated by commas."),
                 new Option<bool>(aliases: new String[] {"--original", "-O", "-o"}, description: "Keep package file as original."),
             };
 
-            cmd.Handler = CommandHandler.Create<string, FileInfo, string?, string?, bool, string?, string?, bool, IConsole>(HandleInput);
+            cmd.Handler = CommandHandler.Create<string, FileInfo, string?, string?, string?, bool, string?, string?, bool, IConsole>(HandleInput);
 
             return await cmd.InvokeAsync(args);
         }
 
-        static public void HandleInput(string cookie, FileInfo file, string? name, string? desc, bool app, string? emails, string? groups, bool original, IConsole console)
+        static public void HandleInput(string cookie, FileInfo file, string? name, string? desc, string? screen, bool app, string? emails, string? groups, bool original, IConsole console)
         {
             string filename = file.Name;
             string filepath = file.FullName;
@@ -778,7 +779,7 @@ namespace Scarlett_Sideloader
             //upload screenshot
             Console.ForegroundColor = ConsoleColor.White;
             Console.Write($"Adding screenshot for {appname}: ");
-            if (UploadScreenShot(neededsubmissioninfo, createdappinfo, HttpMethod.Post, listinginfo))
+            if (UploadScreenShot(neededsubmissioninfo, createdappinfo, HttpMethod.Post, listinginfo, screen))
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.Write("Success!\n");
@@ -2298,7 +2299,6 @@ namespace Scarlett_Sideloader
             form.Add(tempcontent);
             tempcontent = new StringContent(desc);
             tempcontent.Headers.Clear();
-            //TODO
             tempcontent.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data") { Name = "ListingModels[0].Listing.Description" };
             form.Add(tempcontent);
             tempcontent = new StringContent("");
@@ -3049,10 +3049,10 @@ namespace Scarlett_Sideloader
             }
         }
 
-        static bool UploadScreenShot(NeededSubmissionInfo neededsubmissioninfo, NeededAppInfo neededappinfo, HttpMethod httpmethod, ListingInfo listinginfo)
+        static bool UploadScreenShot(NeededSubmissionInfo neededsubmissioninfo, NeededAppInfo neededappinfo, HttpMethod httpmethod, ListingInfo listinginfo, string screen)
         {
             //file for screenshot is currently hardcoded may change this at somepoint but this is currently not a priority
-            FileStream screenshot = new FileStream("blank.png", FileMode.Open, FileAccess.Read);
+            FileStream screenshot = new FileStream(screen, FileMode.Open, FileAccess.Read);
             string partnercenterurl = partneruri + $"en-us/dashboard/listings/FileUploadV2/CreateContext?parentId={neededappinfo.bigId}&parentType=0";
             var request = new HttpRequestMessage(HttpMethod.Post, partnercenterurl);
             ScreenshotInfo screenshotinfo = new ScreenshotInfo() { };
