@@ -60,6 +60,18 @@ namespace Scarlett_Sideloader
                 Console.WriteLine("You must  set either a list of groups to whitelist or a list of emails to whitelist, you cannot leave both blank");
                 return;
             }
+            if (screen == null)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Please specify a screenshot image name.");
+                return;
+            }
+            if (desc == null)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Setting default description.");
+                desc = "default description";
+            }
             //set aspnet cookie and create http client
             CookieContainer cookieContainer = new CookieContainer();
             cookieContainer.Add(partneruri, new Cookie(".AspNet.Cookies", cookie));
