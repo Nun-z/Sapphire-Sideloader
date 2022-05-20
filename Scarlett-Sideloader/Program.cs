@@ -57,8 +57,8 @@ namespace Scarlett_Sideloader
             if ((emails == null) && (groups == null))
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("You must  set either a list of groups to whitelist or a list of emails to whitelist, you cannot leave both blank");
-                return;
+                Console.WriteLine("Defaulting emails to 'null@test.com.'");
+                emails = "null@test.com";
             }
             if (screen == null)
             {
